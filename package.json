@@ -1,0 +1,26 @@
+{
+  "name": "typescript",
+  "version": "1.0.0",
+  "description": "Typescript 학습 레포지터리입니다.",
+  "main": "app(1).js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/web-api": "^7.5.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "js-yaml": "^4.1.0",
+    "pg": "^8.13.0",
+    "@slack/bolt": "^3.22.0",
+    "canvas": "^2.11.2",
+    "csv-writer": "^1.6.0",
+    "echarts": "^5.5.1",
+    "jsonpath": "^1.1.1",
+    "pg-promise": "^11.9.1",
+    "yamljs": "^0.3.0"
+  }
+}

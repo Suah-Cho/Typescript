@@ -1,0 +1,1 @@
+GET_USER: "SELECT * FROM users;"

@@ -1,0 +1,61 @@
+
+raw_data:
+
+  #language=SQL
+  raw_gh_data_item: |
+    with timescale_chunkdata as (
+        select
+            *
+        from raw_gh_data_items rgdi
+        where
+            rgdi.event_time >= $<start_time>::date - interval '1 day'
+        and rgdi.event_time <= $<end_time>::date + interval '1 day'
+        and (rgdi.event_time at time zone (select c.settings->>'time_zone' from compartments c where c.comp_id = $<comp_id>::uuid)) >= $<start_time>
+        and (rgdi.event_time at time zone (select c.settings->>'time_zone' from compartments c where c.comp_id = $<comp_id>::uuid)) <= $<end_time>
+        )
+    select
+        (tscd.event_time at time zone (select c.settings->>'time_zone' from compartments c where c.comp_id = $<comp_id>::uuid)) as zone_time,
+      tscd.installed_device_id,
+      id.name as installed_device_name,
+      id.comp_id,
+      tscd.data_type_id,
+      dt.eng_name as data_type_eng_name,
+      dt.kr_name as data_type_kr_name,
+      tscd.value
+    from timescale_chunkdata tscd, installed_devices id, data_types dt
+    where
+        tscd.installed_device_id = id.installed_device_id
+      and tscd.data_type_id = dt.id
+      and tscd.installed_device_id = any($<installed_device_ids>::uuid[])
+
+    order by zone_time, installed_device_id
+
+  #language=SQL
+  raw_crawling_gh_data_item: |
+    with timescale_chunkdata as (
+        select
+            *
+        from raw_crawling_gh_data_items rcgdi
+        where
+            rcgdi.event_time >= $<start_time>::date - interval '1 day'
+        and rcgdi.event_time <= $<end_time>::date + interval '1 day'
+        and (rcgdi.event_time at time zone (select c.settings->>'time_zone' from compartments c where c.comp_id = $<comp_id>::uuid)) >= $<start_time>
+        and (rcgdi.event_time at time zone (select c.settings->>'time_zone' from compartments c where c.comp_id = $<comp_id>::uuid)) <= $<end_time>
+        )
+    select
+        (tscd.event_time at time zone (select c.settings->>'time_zone' from compartments c where c.comp_id = $<comp_id>::uuid)) as zone_time,
+        tscd.installed_device_id,
+        id.name as installed_device_name,
+        id.comp_id,
+        tscd.vender_data_type_id,
+        vdt.eng_name as data_type_eng_name,
+        vdt.kr_name as data_type_kr_name,
+        tscd.value
+    from 
+        timescale_chunkdata tscd, installed_devices id, vendor_data_types vdt
+    where
+        tscd.installed_device_id = id.installed_device_id
+        and tscd.vender_data_type_id = vdt.vendor_data_type_id
+        and tscd.installed_device_id = any($<installed_device_ids>::uuid[])
+        and tscd.vender_data_type_id = any($<vender_data_type_ids>) 
+    order by zone_time, installed_device_id, tscd.vender_data_type_id
